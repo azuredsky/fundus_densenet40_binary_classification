@@ -3,7 +3,8 @@ from __future__ import absolute_import
 from keras import backend as K
 from keras.engine import Layer
 from keras.utils.generic_utils import get_custom_objects
-from keras.utils.conv_utils import normalize_data_format
+import keras.backend as K
+from keras.backend  import normalize_data_format
 
 if K.backend() == 'theano':
     import theano_backend as K_BACKEND

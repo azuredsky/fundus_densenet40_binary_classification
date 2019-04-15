@@ -20,8 +20,8 @@ from keras.regularizers import l2
 from keras.utils.layer_utils import convert_all_kernels_in_model, convert_dense_weights_data_format
 from keras.utils.data_utils import get_file
 from keras.engine.topology import get_source_inputs
-from keras.applications.imagenet_utils import _obtain_input_shape
-from keras.applications.imagenet_utils import decode_predictions
+from keras_applications.imagenet_utils import _obtain_input_shape
+from keras_applications.imagenet_utils import decode_predictions
 
 from keras.preprocessing import image
 from keras import models
@@ -32,11 +32,11 @@ from subpixel import SubPixelUpscaling
 
 from keras.preprocessing.image import ImageDataGenerator
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 def DenseNet(input_shape=None, depth=40, nb_dense_block=3, growth_rate=12, nb_filter=-1, nb_layers_per_block=-1,
              bottleneck=False, reduction=0.0, dropout_rate=0.0, weight_decay=1e-4, subsample_initial_block=False,
              include_top=True, weights=None, input_tensor=None,
-             classes=1, activation='sigmoid'):
+             classes=9, activation='sigmoid'):
 
     # Determine proper input shape
     input_shape = _obtain_input_shape(input_shape,
@@ -225,12 +225,12 @@ def __create_dense_net(nb_classes, img_input, include_top, depth=40, nb_dense_bl
     return x
 if __name__ == '__main__':
 
-    train_data_dir = 'data_4500/train'
-    validation_data_dir = 'data_4500/validation'
+    train_data_dir = 'data/train'
+    validation_data_dir = 'data/validation'
     nb_train_samples = 7200
     nb_validation_samples = 1800
     epochs = 10
-    batch_size = 128
+    batch_size = 32
 
     model = DenseNet((32,32, 3), depth=40, nb_dense_block=3,
                      growth_rate=12, bottleneck=True, reduction=0.5, weights=None)
@@ -249,27 +249,27 @@ if __name__ == '__main__':
     train_data_dir,
     target_size=(32,32),
     batch_size=batch_size,
-    class_mode='binary')
+    class_mode='categorical')
     print("======validation_generator======")
     validation_generator = test_datagen.flow_from_directory(validation_data_dir,target_size=(32,32),
     batch_size=batch_size,
-    class_mode='binary')
+    class_mode='categorical')
     print("======fit_generator======")
 
     print(validation_generator.image_data_generator)
 
 
-    model.compile(loss='binary_crossentropy',optimizer='sgd',metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
     model.fit_generator(
     train_generator,
     epochs=epochs,
     steps_per_epoch=nb_train_samples // batch_size,
-    validation_data=validation_generator,validation_steps=nb_validation_samples // batch_size,callbacks=[TensorBoard(log_dir='models/logs/DenseNet_40_32')])
+    validation_data=validation_generator,validation_steps=nb_validation_samples // batch_size,callbacks=[TensorBoard(log_dir='models/logs/DenseNet_40_33')])
 
     models.save_model(model,'models/keras_DenseNet40_32.h5')
     print("save_weights success...")
     print("========predict========")
-    img_path='data_4500/train/1/10340_left_0.jpeg'
+    img_path='data/train/Tang2-mdl/190104906824_00000000_000000_Color_L_002.jpg'
     img = image.load_img(img_path, target_size=(32, 32))
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
